@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>MicroConf. Asker</title>
+    <link rel="stylesheet" type="text/css" href="index.css" >
+</head>
+<body onmousedown="handsUp(event)" onmouseup="handsDown(event)" >
+
+    <script src='/socket.io/socket.io.js'></script>
+    <script>
+
+        document.addEventListener('touchstart', handsUp, false);
+
+        document.addEventListener('touchend', handsDown, false);
+
+        var socket = io();
+        var topTicket;
+        var totalCount;
+
+        socket.on('onTicketActivated', onTicketActivated);
+        socket.on('onTicketRemoved', onTicketRemoved);
+        socket.on('updateTopMostTicket', onUpdateTopMostTicket);
+        socket.on('reconnected', function () {
+            console.log('reconnected');
+            updateStatus('reconnected');
+        });
+        socket.on('error', function (data) {
+            console.log('error', data);
+        });
+        socket.on('reconnect_error', function (data) {
+            console.log('reconnect_error', data);
+        });
+        socket.on('disconnect', function () {
+            console.log('disconnected');
+        });
+
+        function onTicketActivated(ticket) {
+            document.getElementById("yourTicket").innerHTML = JSON.stringify(ticket);
+            console.log(onTicketActivated, ticket)
+        }
+
+        function onTicketRemoved(ticket) {
+            document.getElementById("yourTicket").innerHTML = '';
+            console.log('onTicketRemoved', ticket);
+        }
+
+        function onUpdateTopMostTicket(data) {
+            topTicket = data.ticket;
+            totalCount = data.totalCount;
+            document.getElementById("topTicket").innerHTML = JSON.stringify(data);
+            console.log(topTicket, totalCount);
+        }
+
+        function handsUp() {
+            event && event.preventDefault();
+            event && event.stopPropagation();
+
+            console.log('handsUp');
+            socket.emit('handsUp');
+        }
+
+        function handsDown(event) {
+            event && event.preventDefault();
+            event && event.stopPropagation();
+
+            console.log('handsDown');
+            socket.emit('handsDown');
+        }
+    </script>
+    <div id="topTicket"></div>
+    <div id="yourTicket"></div>
+</body>
+</html>
