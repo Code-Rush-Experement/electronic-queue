@@ -7,10 +7,13 @@ const server = require('http').createServer(app);
 const io = require('socket.io')(server);
 const path = require('path');
 
+const host = process.env.host || 'localhost';
+const port = process.env.port || 80;
+
 configureStatic();
 configureSocket();
 
-server.listen(80);
+server.listen(port, host);
 
 
 function configureStatic() {
@@ -24,6 +27,12 @@ function configureSocket() {
     var currentTopTicket;
     io.on('connection', function(socket){
         var activeTicket;
+
+        socket.on('disconnect', function() {
+            console.log('Got disconnect!');
+
+            removeActiveTicket(false);
+        });
 
         socket.on('echo',function(data){
             socket.emit('echo', data);
@@ -40,11 +49,12 @@ function configureSocket() {
         });
         socket.on('handsDown', removeActiveTicket);
 
-        function removeActiveTicket() {
-            tickets = tickets.filter(function (item) { return item !== activeTicket });
-            socket.emit('onTicketRemoved', activeTicket);
+        function removeActiveTicket(emitNotif) {
+            var oldActiveTicket = activeTicket;
             activeTicket = undefined;
+            tickets = tickets.filter(function (item) { return item !== oldActiveTicket });
             checkAndUpdateTopMostTicket();
+            !emitNotif && socket.emit('onTicketRemoved', oldActiveTicket);
         }
         emitTopTicket(socket);
         socket.emit('welcome', function () {});
