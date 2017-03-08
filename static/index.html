@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>MicroConf. Asker</title>
+    <link rel="stylesheet" type="text/css" href="https://necolas.github.io/normalize.css/5.0.0/normalize.css" >
     <link rel="stylesheet" type="text/css" href="index.css" >
 </head>
 <body onmousedown="handsUp(event)" onmouseup="handsDown(event)" >
@@ -27,16 +28,18 @@
         });
         socket.on('error', function (data) {
             console.log('error', data);
+            alert(data);
         });
         socket.on('reconnect_error', function (data) {
             console.log('reconnect_error', data);
         });
         socket.on('disconnect', function () {
             console.log('disconnected');
+            alert('disconnected');
         });
 
         function onTicketActivated(ticket) {
-            document.getElementById("yourTicket").innerHTML = JSON.stringify(ticket);
+            document.getElementById("yourTicket").innerHTML = ticket.id;
             console.log(onTicketActivated, ticket)
         }
 
@@ -48,7 +51,7 @@
         function onUpdateTopMostTicket(data) {
             topTicket = data.ticket;
             totalCount = data.totalCount;
-            document.getElementById("topTicket").innerHTML = JSON.stringify(data);
+            document.getElementById("topTicket").innerHTML = (data.ticket && data.ticket.id  + " | (" + data.totalCount + ")" ) || 'none';
             console.log(topTicket, totalCount);
         }
 
@@ -68,7 +71,11 @@
             socket.emit('handsDown');
         }
     </script>
-    <div id="topTicket"></div>
-    <div id="yourTicket"></div>
+
+    active: <span class="activeTicket"><strong><span id="topTicket"></span></strong></span>
+    <br/>
+    your: <span class="yourTicket"><strong><span id="yourTicket"></span></strong></span>
+    <hr/>
+    <div class="handUpInfo">tap and <b>hold</b> for "handsUp"</div>
 </body>
 </html>
