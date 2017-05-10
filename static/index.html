@@ -39,7 +39,8 @@
         });
 
         function onTicketActivated(ticket) {
-            document.getElementById("yourTicket").innerHTML = ticket.id + ' | ' + ticket.shortKey;
+            document.getElementById("yourTicket").innerHTML = 'id: ' + ticket.id + ' key:' +
+                ticket.shortKey + ' / bin: ( ' + ticket.shortKey.toString(2) + ' )';
             console.log(onTicketActivated, ticket)
         }
 
