@@ -39,7 +39,7 @@
         });
 
         function onTicketActivated(ticket) {
-            document.getElementById("yourTicket").innerHTML = ticket.id;
+            document.getElementById("yourTicket").innerHTML = ticket.id + ' | ' + ticket.shortKey;
             console.log(onTicketActivated, ticket)
         }
 

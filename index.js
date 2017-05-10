@@ -41,7 +41,8 @@ function configureSocket() {
             if (activeTicket) {
                 removeActiveTicket();
             }
-            var ticketInfo = {id:ticketCounter++, time:(Date.now())};
+            var ticketId = ticketCounter++;
+            var ticketInfo = { id:ticketId, shortKey:ticketCounter, time:(Date.now()) };
             activeTicket = ticketInfo;
             tickets.push(ticketInfo);
             socket.emit('onTicketActivated', ticketInfo);
