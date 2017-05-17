@@ -23,7 +23,6 @@ function configureStatic() {
 
 function configureSocket() {
     var tickets = [];
-    var shortKeys = [];
     var ticketCounter = 0;
     var currentTopTicket;
     io.on('connection', function(socket){
@@ -43,7 +42,7 @@ function configureSocket() {
                 removeActiveTicket();
             }
             var ticketId = ticketCounter++;
-            var ticketInfo = { id: ticketId, shortKey: getTicketShortKey(ticketId), time: (Date.now()) };
+            var ticketInfo = { id: ticketId, time: (Date.now()) };
             activeTicket = ticketInfo;
             tickets.push(ticketInfo);
             socket.emit('onTicketActivated', ticketInfo);
@@ -57,7 +56,6 @@ function configureSocket() {
             tickets = tickets.filter(function (item) { return item !== oldActiveTicket });
             checkAndUpdateTopMostTicket();
             !emitNotif && socket.emit('onTicketRemoved', oldActiveTicket);
-            releaseTicketShortKey();
         }
         emitTopTicket(socket);
         socket.emit('welcome', function () {});
@@ -68,22 +66,11 @@ function configureSocket() {
     function checkAndUpdateTopMostTicket() {
         if (currentTopTicket !== _.first(tickets)) {
             currentTopTicket = _.first(tickets);
-            emitTopTicket(io);
         }
+        emitTopTicket(io);
     }
 
     function emitTopTicket(socket) {
         socket.emit('updateTopMostTicket', { ticket:currentTopTicket, totalCount: tickets.length});
-    }
-
-
-    function getTicketShortKey(ticketId) {
-        shortKeys.push(ticketId);
-        return _.indexOf(shortKeys, ticketId);
-    }
-
-    function releaseTicketShortKey(ticketId) {
-        var ind = _.indexOf(shortKeys, ticketId);
-        shortKeys.splice(ind, 1);
     }
 }
