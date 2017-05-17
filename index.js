@@ -71,6 +71,8 @@ function configureSocket() {
     }
 
     function emitTopTicket(socket) {
-        socket.emit('updateTopMostTicket', { ticket:currentTopTicket, totalCount: tickets.length});
+        const data = { ticket:currentTopTicket, totalCount: tickets.length};
+        console.log('emit update', JSON.stringify(data));
+        socket.emit('updateTopMostTicket', data);
     }
 }

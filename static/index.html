@@ -34,13 +34,11 @@
             console.log('reconnect_error', data);
         });
         socket.on('disconnect', function () {
-            console.log('disconnected');
-            alert('disconnected');
+            console.error('disconnected');
         });
 
         function onTicketActivated(ticket) {
-            document.getElementById("yourTicket").innerHTML = 'id: ' + ticket.id + ' key:' +
-                ticket.shortKey + ' / bin: ( ' + ticket.shortKey.toString(2) + ' )';
+            document.getElementById("yourTicket").innerHTML = ticket.id;
             console.log(onTicketActivated, ticket)
         }
 
