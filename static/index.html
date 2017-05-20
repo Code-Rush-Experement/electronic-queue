@@ -2,14 +2,34 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1, user-scalable=0, maximum-scale=1, minimum-scale=1"
+    >
     <title>MicroConf. Asker</title>
     <link rel="stylesheet" type="text/css" href="https://necolas.github.io/normalize.css/5.0.0/normalize.css" >
     <link rel="stylesheet" type="text/css" href="index.css" >
+
+    <link rel="manifest" href="/manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="MicroConf. Asker">
+    <link rel="apple-touch-icon" href="icons/icon_128.png">
+    <meta name="msapplication-TileImage" content="icons/icon_128.png">
+    <meta name="msapplication-TileColor" content="#2ea12e">
 </head>
 <body onmousedown="handsUp(event)" onmouseup="handsDown(event)" >
 
     <script src='/socket.io/socket.io.js'></script>
     <script>
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js', { scope: '/' }).then(function(reg) {
+                console.log('[Service Worker] Registration succeeded. Scope is ' + reg.scope);
+            }).catch(function(error) {
+                console.log('[Service Worker] Registration failed with ' + error);
+            })
+        }
 
         document.addEventListener('touchstart', handsUp, false);
 
@@ -22,6 +42,9 @@
         socket.on('onTicketActivated', onTicketActivated);
         socket.on('onTicketRemoved', onTicketRemoved);
         socket.on('updateTopMostTicket', onUpdateTopMostTicket);
+        socket.on('connect', function () {
+            showApp();
+        });
         socket.on('reconnected', function () {
             console.log('reconnected');
             updateStatus('reconnected');
@@ -32,6 +55,7 @@
         });
         socket.on('reconnect_error', function (data) {
             console.log('reconnect_error', data);
+            showNetworkError();
         });
         socket.on('disconnect', function () {
             console.error('disconnected');
@@ -69,12 +93,30 @@
             console.log('handsDown');
             socket.emit('handsDown');
         }
+
+        function showNetworkError() {
+            document.getElementById('view-starting-ph').style.display = 'none';
+            document.getElementById('view-normal').style.display = 'none';
+            document.getElementById('view-network-error').style.display = 'block';
+        }
+        function showApp() {
+            document.getElementById('view-starting-ph').style.display = 'none';
+            document.getElementById('view-normal').style.display = 'block';
+            document.getElementById('view-network-error').style.display = 'none';
+        }
     </script>
 
-    active: <span class="activeTicket"><strong><span id="topTicket"></span></strong></span>
-    <br/>
-    your: <span class="yourTicket"><strong><span id="yourTicket"></span></strong></span>
-    <hr/>
-    <div class="handUpInfo">tap and <b>hold</b> for "handsUp"</div>
+    <div id="view-starting-ph">Starting...</div>
+    <div id="view-normal" class="hiddenInStartup">
+        active: <span class="activeTicket"><strong><span id="topTicket"></span></strong></span>
+        <br/>
+        your: <span class="yourTicket"><strong><span id="yourTicket"></span></strong></span>
+        <hr/>
+        <div class="handUpInfo">tap and <b>hold</b> for "handsUp"</div>
+    </div>
+    <div id="view-network-error" class="errorNotification hiddenInStartup">
+        <div class="title">Something went wrong :(</div>
+        <div class="description">Maybe, its internet connection problem.</div>
+    </div>
 </body>
 </html>
