@@ -3,12 +3,27 @@
 const express = require('express');
 const _ = require('lodash');
 const app = express();
-const server = require('http').createServer(app);
-const io = require('socket.io')(server);
 const path = require('path');
+const fs = require('fs');
 
 const host = process.env.host || 'localhost';
-const port = process.env.port || 80;
+const port = process.env.port || 443;
+
+
+const privateKeyPath = process.env.CERT_PRIVATE_KEY || './etc/localhost-cert/localhost.server.key';
+const publicKeyPath = process.env.CERT_PUBLIC_KEY || './etc/localhost-cert/localhost.server.crt';
+
+const privateKey = fs.readFileSync(privateKeyPath).toString();
+const certificate = fs.readFileSync(publicKeyPath).toString();
+
+const options = {
+    key : privateKey,
+    cert : certificate
+};
+const https = require('https');
+const server = https.createServer(options, app);
+const io = require('socket.io')(server);
+
 
 configureStatic();
 configureSocket();
