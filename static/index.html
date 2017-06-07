@@ -18,7 +18,7 @@
     <meta name="msapplication-TileImage" content="icons/icon_128.png">
     <meta name="msapplication-TileColor" content="#2ea12e">
 </head>
-<body onmousedown="handsUp(event)" onmouseup="handsDown(event)" >
+<body >
 
     <script src='/socket.io/socket.io.js'></script>
     <script>
@@ -31,13 +31,21 @@
             })
         }
 
-        document.addEventListener('touchstart', handsUp, false);
-
-        document.addEventListener('touchend', handsDown, false);
+        function onReady() {
+            var supportsTouch = 'ontouchstart' in window || navigator.msMaxTouchPoints;
+            if (supportsTouch) {
+                document.addEventListener('touchstart', onMouseDown, false);
+            } else {
+                document.addEventListener('mousedown', onMouseDown, false)
+            }
+        }
+        document.addEventListener('DOMContentLoaded', onReady);
 
         var socket = io();
         var topTicket;
         var totalCount;
+        var activeTicket;
+        var isHandsUp = false;
 
         socket.on('onTicketActivated', onTicketActivated);
         socket.on('onTicketRemoved', onTicketRemoved);
@@ -62,11 +70,13 @@
         });
 
         function onTicketActivated(ticket) {
+            activeTicket = ticket;
             document.getElementById("yourTicket").innerHTML = ticket.id;
             console.log(onTicketActivated, ticket)
         }
 
         function onTicketRemoved(ticket) {
+            activeTicket = undefined;
             document.getElementById("yourTicket").innerHTML = '';
             console.log('onTicketRemoved', ticket);
         }
@@ -78,20 +88,40 @@
             console.log(topTicket, totalCount);
         }
 
-        function handsUp() {
+        function toggleHand(event) {
             event && event.preventDefault();
             event && event.stopPropagation();
 
-            console.log('handsUp');
-            socket.emit('handsUp');
+            isHandsUp = !isHandsUp;
+
+            if (isHandsUp) {
+                handsUp();
+            } else {
+                handsDown();
+            }
         }
 
-        function handsDown(event) {
-            event && event.preventDefault();
-            event && event.stopPropagation();
+        function onMouseDown(event) {
+            toggleHand(event);
+        }
 
+        function handsUp() {
+            console.log('handsUp');
+            socket.emit('handsUp');
+
+            redrawHandsState();
+        }
+
+        function handsDown() {
             console.log('handsDown');
             socket.emit('handsDown');
+
+            redrawHandsState();
+        }
+
+        function redrawHandsState() {
+            document.querySelector('.handImage').classList.toggle('handsUpButton', isHandsUp);
+            document.querySelector('.handImage').classList.toggle('handsDownButton', !isHandsUp);
         }
 
         function showNetworkError() {
@@ -112,7 +142,12 @@
         <br/>
         your: <span class="yourTicket"><strong><span id="yourTicket"></span></strong></span>
         <hr/>
-        <div class="handUpInfo">tap and <b>hold</b> for "handsUp"</div>
+        <div class="handState">
+            <div class="handsDownButton handImage"></div>
+        </div>
+
+        <hr/>
+        <div class="handUpInfo">tap for "handsUp"</div>
     </div>
     <div id="view-network-error" class="errorNotification hiddenInStartup">
         <div class="title">Something went wrong :(</div>

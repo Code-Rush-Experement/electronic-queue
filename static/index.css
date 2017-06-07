@@ -36,3 +36,25 @@ body {
 .hiddenInStartup  {
     display: none;
 }
+
+.handState {
+}
+
+.handImage {
+    width: 100%;
+    height: 40vh;
+    background-image: url(/images/hands-512.png);
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: Auto 100%;
+    transition: background-color 500ms linear
+}
+
+.handsUpButton {
+    background-color: yellow;
+}
+
+.handsDownButton {
+    background-color: transparent;
+    transition: background-color 500ms linear;
+}
