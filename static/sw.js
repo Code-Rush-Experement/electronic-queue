@@ -1,4 +1,4 @@
-var CACHE_NAME = 'microconf-ssker-v1'
+var CACHE_NAME = 'microconf-ssker-v1.1'
 var INDEX_ITEM_PATH = '/index.html'
 var FILES_TO_CACHE = [
     'index.html',
@@ -9,6 +9,7 @@ var FILES_TO_CACHE = [
     'icons/icon_128.png',
     'icons/icon_256.png',
     'icons/icon_512.png',
+    'images/hands-512.png',
     'https://necolas.github.io/normalize.css/5.0.0/normalize.css'
 ]
 var INDEX_PATHES = [
