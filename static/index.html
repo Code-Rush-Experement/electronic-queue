@@ -7,8 +7,8 @@
             content="width=device-width, initial-scale=1, user-scalable=0, maximum-scale=1, minimum-scale=1"
     >
     <title>MicroConf. Asker</title>
-    <link rel="stylesheet" type="text/css" href="https://necolas.github.io/normalize.css/5.0.0/normalize.css" >
-    <link rel="stylesheet" type="text/css" href="index.css" >
+    <link rel="stylesheet" type="text/css" href="https://necolas.github.io/normalize.css/5.0.0/normalize.css">
+    <link rel="stylesheet" type="text/css" href="index.css">
 
     <link rel="manifest" href="/manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -18,140 +18,187 @@
     <meta name="msapplication-TileImage" content="icons/icon_128.png">
     <meta name="msapplication-TileColor" content="#2ea12e">
 </head>
-<body >
+<body>
 
-    <script src='/socket.io/socket.io.js'></script>
-    <script>
+<script src='/socket.io/socket.io.js'></script>
+<script>
 
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/sw.js', { scope: '/' }).then(function(reg) {
-                console.log('[Service Worker] Registration succeeded. Scope is ' + reg.scope);
-            }).catch(function(error) {
-                console.log('[Service Worker] Registration failed with ' + error);
-            })
-        }
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js', {scope: '/'}).then(function (reg) {
+      console.log('[Service Worker] Registration succeeded. Scope is ' + reg.scope)
+    }).catch(function (error) {
+      console.log('[Service Worker] Registration failed with ' + error)
+    })
+  }
 
-        function onReady() {
-            var supportsTouch = 'ontouchstart' in window || navigator.msMaxTouchPoints;
-            if (supportsTouch) {
-                document.addEventListener('touchstart', onMouseDown, false);
-            } else {
-                document.addEventListener('mousedown', onMouseDown, false)
-            }
-        }
-        document.addEventListener('DOMContentLoaded', onReady);
+  function onReady () {
+    var supportsTouch = 'ontouchstart' in window || navigator.msMaxTouchPoints
+    var element = document.querySelector('.handState')
+    if (supportsTouch) {
+      element.addEventListener('touchstart', onMouseDown, false)
+    } else {
+      element.addEventListener('mousedown', onMouseDown, false)
+    }
+  }
 
-        var socket = io();
-        var topTicket;
-        var totalCount;
-        var activeTicket;
-        var isHandsUp = false;
+  document.addEventListener('DOMContentLoaded', onReady)
 
-        socket.on('onTicketActivated', onTicketActivated);
-        socket.on('onTicketRemoved', onTicketRemoved);
-        socket.on('updateTopMostTicket', onUpdateTopMostTicket);
-        socket.on('connect', function () {
-            showApp();
-        });
-        socket.on('reconnected', function () {
-            console.log('reconnected');
-            updateStatus('reconnected');
-        });
-        socket.on('error', function (data) {
-            console.log('error', data);
-            alert(data);
-        });
-        socket.on('reconnect_error', function (data) {
-            console.log('reconnect_error', data);
-            showNetworkError();
-        });
-        socket.on('disconnect', function () {
-            console.error('disconnected');
-        });
+  var socket = io()
+  var topTicket
+  var totalCount
+  var activeTicket
+  var isHandsUp = false
 
-        function onTicketActivated(ticket) {
-            activeTicket = ticket;
-            document.getElementById("yourTicket").innerHTML = ticket.id;
-            console.log(onTicketActivated, ticket)
-        }
+  socket.on('onTicketActivated', onTicketActivated)
+  socket.on('onTicketRemoved', onTicketRemoved)
+  socket.on('updateTopMostTicket', onUpdateTopMostTicket)
+  socket.on('connect', function () {
+    showApp()
+  })
+  socket.on('reconnected', function () {
+    console.log('reconnected')
+    updateStatus('reconnected')
+  })
+  socket.on('error', function (data) {
+    console.log('error', data)
+    alert(data)
+  })
+  socket.on('reconnect_error', function (data) {
+    console.log('reconnect_error', data)
+    showNetworkError()
+  })
+  socket.on('disconnect', function () {
+    console.error('disconnected')
+  })
+  socket.on('onRatesUpdated', onUpdateRates)
+  socket.on('onClientRateUpdated', onClientRateUpdated)
 
-        function onTicketRemoved(ticket) {
-            activeTicket = undefined;
-            document.getElementById("yourTicket").innerHTML = '';
-            console.log('onTicketRemoved', ticket);
-        }
+  function onTicketActivated (ticket) {
+    activeTicket = ticket
+    document.getElementById('yourTicket').innerHTML = ticket.id
+    console.log(onTicketActivated, ticket)
+  }
 
-        function onUpdateTopMostTicket(data) {
-            topTicket = data.ticket;
-            totalCount = data.totalCount;
-            document.getElementById("topTicket").innerHTML = (data.ticket && data.ticket.id  + " | (" + data.totalCount + ")" ) || 'none';
-            console.log(topTicket, totalCount);
-        }
+  function onTicketRemoved (ticket) {
+    activeTicket = undefined
+    document.getElementById('yourTicket').innerHTML = ''
+    console.log('onTicketRemoved', ticket)
+  }
 
-        function toggleHand(event) {
-            event && event.preventDefault();
-            event && event.stopPropagation();
+  function onUpdateTopMostTicket (data) {
+//    topTicket = data.ticket
+//    totalCount = data.totalCount
+//    document.getElementById('topTicket').innerHTML = (data.ticket && data.ticket.id + ' | (' + data.totalCount + ')' ) || 'none'
+//    console.log(topTicket, totalCount)
+  }
 
-            isHandsUp = !isHandsUp;
+  function onUpdateRates (data) {
+    console.log('rates updated', data.rates)
+//    document.querySelector('.allRates').innerText = data.rates.sort().join(', ');
+  }
 
-            if (isHandsUp) {
-                handsUp();
-            } else {
-                handsDown();
-            }
-        }
+  function onClientRateUpdated (rate) {
+    //document.querySelector('.rate-selector').value = rate;
+    for (var i = 1; i < 7; i++) {
+      document.querySelector(`.rate-panel-buttons > :nth-child(${i})`).classList.remove('rate-button__selected')
+    }
+    document.querySelector(`.rate-panel-buttons > :nth-child(${+rate + 1})`).classList.add('rate-button__selected')
+  }
 
-        function onMouseDown(event) {
-            toggleHand(event);
-        }
+  function toggleHand (event) {
+    event && event.preventDefault()
+    event && event.stopPropagation()
 
-        function handsUp() {
-            console.log('handsUp');
-            socket.emit('handsUp');
+    isHandsUp = !isHandsUp
 
-            redrawHandsState();
-        }
+    if (isHandsUp) {
+      handsUp()
+    } else {
+      handsDown()
+    }
+  }
 
-        function handsDown() {
-            console.log('handsDown');
-            socket.emit('handsDown');
+  function onMouseDown (event) {
+    toggleHand(event)
+  }
 
-            redrawHandsState();
-        }
+  function handsUp () {
+    console.log('handsUp')
+    socket.emit('handsUp')
 
-        function redrawHandsState() {
-            document.querySelector('.handImage').classList.toggle('handsUpButton', isHandsUp);
-            document.querySelector('.handImage').classList.toggle('handsDownButton', !isHandsUp);
-        }
+    redrawHandsState()
+  }
 
-        function showNetworkError() {
-            document.getElementById('view-starting-ph').style.display = 'none';
-            document.getElementById('view-normal').style.display = 'none';
-            document.getElementById('view-network-error').style.display = 'block';
-        }
-        function showApp() {
-            document.getElementById('view-starting-ph').style.display = 'none';
-            document.getElementById('view-normal').style.display = 'block';
-            document.getElementById('view-network-error').style.display = 'none';
-        }
-    </script>
+  function handsDown () {
+    console.log('handsDown')
+    socket.emit('handsDown')
 
-    <div id="view-starting-ph">Starting...</div>
-    <div id="view-normal" class="hiddenInStartup">
-        active: <span class="activeTicket"><strong><span id="topTicket"></span></strong></span>
-        <br/>
-        your: <span class="yourTicket"><strong><span id="yourTicket"></span></strong></span>
-        <hr/>
-        <div class="handState">
-            <div class="handsDownButton handImage"></div>
+    redrawHandsState()
+  }
+
+  function redrawHandsState () {
+    document.querySelector('.handImage').classList.toggle('handsUpButton', isHandsUp)
+    document.querySelector('.handImage').classList.toggle('handsDownButton', !isHandsUp)
+  }
+
+  function showNetworkError () {
+    document.getElementById('view-starting-ph').style.display = 'none'
+    document.getElementById('view-normal').style.display = 'none'
+    document.getElementById('view-network-error').style.display = 'block'
+  }
+
+  function showApp () {
+    document.getElementById('view-starting-ph').style.display = 'none'
+    document.getElementById('view-normal').style.display = 'block'
+    document.getElementById('view-network-error').style.display = 'none'
+  }
+
+  function changeRate (rate) {
+//    alert(rate)
+//    var rate = (document.querySelector('.rate-selector').value);
+    socket.emit('rate', rate)
+  }
+</script>
+
+<div id="view-starting-ph">Starting...</div>
+<div id="view-normal" class="hiddenInStartup">
+
+    <div>
+        <div class="ticket-info">
+            your ticket: <span class="yourTicket"><strong><span id="yourTicket"></span></strong></span>
+            <!--<hr/>-->
         </div>
+    </div>
+    <div class="handState">
+        <div class="handsDownButton handImage"></div>
+    </div>
 
-        <hr/>
-        <div class="handUpInfo">tap for "handsUp"</div>
+    <!--<hr/>-->
+    <div class="handUpInfo">tap for "handsUp"</div>
+    <hr/>
+    <div>
+        <div class="rate-panel">
+            <div class="rate-panel-label">
+                rate:
+            </div>
+            <div class="rate-panel-buttons">
+                <button class="rate-button" onclick="changeRate(0)">0</button>
+                <button class="rate-button" onclick="changeRate(1)">1</button>
+                <button class="rate-button" onclick="changeRate(2)">2</button>
+                <button class="rate-button" onclick="changeRate(3)">3</button>
+                <button class="rate-button" onclick="changeRate(4)">4</button>
+                <button class="rate-button" onclick="changeRate(5)">5</button>
+            </div>
+        </div>
+        <div>
+        </div>
     </div>
-    <div id="view-network-error" class="errorNotification hiddenInStartup">
-        <div class="title">Something went wrong :(</div>
-        <div class="description">Maybe, its internet connection problem.</div>
-    </div>
+
+
+</div>
+<div id="view-network-error" class="errorNotification hiddenInStartup">
+    <div class="title">Something went wrong :(</div>
+    <div class="description">Maybe, its internet connection problem.</div>
+</div>
 </body>
 </html>

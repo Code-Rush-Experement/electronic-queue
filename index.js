@@ -40,12 +40,27 @@ function configureSocket() {
     var tickets = [];
     var ticketCounter = 0;
     var currentTopTicket;
+    var clientToRates = new Map();
+
+
+    function emitClientRate(socket, rate) {
+        socket.emit('onClientRateUpdated', rate);
+    }
+      function emitUpdateRates (socket) {
+        var rateValues = Array.from(clientToRates.values());
+        console.log(socket.id, rateValues);
+        socket.emit('onRatesUpdated', { rates:rateValues });
+      }
+
     io.on('connection', function(socket){
         var activeTicket;
 
+        updateClientRate(socket, '0');
+
         socket.on('disconnect', function() {
             console.log('Got disconnect!');
-
+            clientToRates.delete(socket.id);
+            emitUpdateRates(io);
             removeActiveTicket(false);
         });
 
@@ -64,6 +79,14 @@ function configureSocket() {
             checkAndUpdateTopMostTicket();
         });
         socket.on('handsDown', removeActiveTicket);
+        socket.on('rate', updateClientRate.bind(this, socket));
+
+          function updateClientRate(socket, rate) {
+              console.log(socket.id, rate);
+            clientToRates.set(socket.id, rate);
+            emitClientRate(socket, rate);
+            emitUpdateRates(io);
+          }
 
         function removeActiveTicket(emitNotif) {
             var oldActiveTicket = activeTicket;
@@ -71,8 +94,10 @@ function configureSocket() {
             tickets = tickets.filter(function (item) { return item !== oldActiveTicket });
             checkAndUpdateTopMostTicket();
             !emitNotif && socket.emit('onTicketRemoved', oldActiveTicket);
+            emitUpdateRates(io);
         }
         emitTopTicket(socket);
+        emitUpdateRates(socket);
         socket.emit('welcome', function () {});
     });
 
