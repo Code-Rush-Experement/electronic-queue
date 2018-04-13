@@ -21,6 +21,7 @@
 <body>
 
 <script src='/socket.io/socket.io.js'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.0/moment.min.js'></script>
 <script>
 
   if ('serviceWorker' in navigator) {
@@ -72,6 +73,12 @@
   })
   socket.on('onRatesUpdated', onUpdateRates)
   socket.on('onClientRateUpdated', onClientRateUpdated)
+  socket.on('onTick', function (ticks) {
+    console.log('ticks', ticks);
+
+    document.querySelector('.topTicketTicks').innerText = moment.utc(moment.duration(ticks, 'seconds').as('milliseconds')).format('mm:ss');
+
+  });
 
   function onTicketActivated (ticket) {
     activeTicket = ticket
@@ -86,10 +93,10 @@
   }
 
   function onUpdateTopMostTicket (data) {
-//    topTicket = data.ticket
-//    totalCount = data.totalCount
-//    document.getElementById('topTicket').innerHTML = (data.ticket && data.ticket.id + ' | (' + data.totalCount + ')' ) || 'none'
-//    console.log(topTicket, totalCount)
+    topTicket = data.ticket
+    totalCount = data.totalCount
+    document.getElementById('topTicket').innerHTML = (data.ticket && data.ticket.id + ' | (' + data.totalCount + ')' ) || 'none'
+    console.log(topTicket, totalCount)
   }
 
   function onUpdateRates (data) {
@@ -166,11 +173,17 @@
     <div>
         <div class="ticket-info">
             your ticket: <span class="yourTicket"><strong><span id="yourTicket"></span></strong></span>
+            <br/>
+            active: <span class="activeTicket"><strong><span id="topTicket"></span></strong></span>
+            <strong><span class="topTicketTicks"> </span></strong>
+            <!--<br/>-->
             <!--<hr/>-->
         </div>
     </div>
     <div class="handState">
-        <div class="handsDownButton handImage"></div>
+        <button class="handsDownButton handImage" onclick="onMouseDown()">
+        <!--<div ></div>-->
+        </button>
     </div>
 
     <!--<hr/>-->
