@@ -17,10 +17,23 @@ body {
 
 .yourTicket {
 }
+.ticket-info {
+    font-size: small;
+    text-align: center;
+}
+hr {
+    margin: 1px;
+}
+
+.rate-panel-label {
+    font-size: x-small;
+    text-align: center;
+}
 
 .handUpInfo {
     text-align: center;
     font-stretch: ultra-expanded;
+    font-size: small;
 }
 
 .errorNotification .title {
@@ -33,11 +46,27 @@ body {
     font-size: small;
 }
 
-.hiddenInStartup  {
+.hiddenInStartup {
     display: none;
 }
 
 .handState {
+}
+
+.rate-button {
+    font-size: 10vw;
+}
+
+.rate-button__selected {
+    background-color: gold;
+}
+
+.rate-panel {
+    text-align: center;
+}
+
+.rate-selector {
+    font-size: 2vh;
 }
 
 .handImage {

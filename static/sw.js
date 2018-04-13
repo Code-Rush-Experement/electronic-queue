@@ -1,4 +1,4 @@
-var CACHE_NAME = 'microconf-ssker-v1.1'
+var CACHE_NAME = 'microconf-ssker-v1.2'
 var INDEX_ITEM_PATH = '/index.html'
 var FILES_TO_CACHE = [
     'index.html',
